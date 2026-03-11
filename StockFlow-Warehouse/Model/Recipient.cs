@@ -1,5 +1,4 @@
-﻿
-namespace StockFlow_Warehouse.Model;
+﻿namespace StockFlow_Warehouse.Model;
 
 public record Recipient(string Name, string Address)
 {
@@ -9,14 +8,15 @@ public record Recipient(string Name, string Address)
 };
 
 
-public record Warehouse(string Name, string Address, Dictionary<Product, int>? ProductsStore = null)
+public record Warehouse(string Name, string Address, Dictionary<Product, int>? Products = null)
     : Recipient(Name: Name, Address: Address)
 {
-    Dictionary<Product, int> ProductsStore { get; set; }
-        = ProductsStore ?? [];
+    Dictionary<Product, int> Products { get; set; }
+        = Products ?? [];
 };
 public record Supplier(string Name, string Address)
     : Recipient(Name: Name, Address: Address);
 public record Customer(string Name, string Address)
     : Recipient(Name: Name, Address: Address);
+
 
