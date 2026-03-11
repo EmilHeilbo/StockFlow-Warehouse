@@ -1,0 +1,11 @@
+@StockFlow_Warehouse_HostAddress = http://localhost:5212
+
+GET {{StockFlow_Warehouse_HostAddress}}/todos/
+Accept: application/json
+
+###
+
+GET {{StockFlow_Warehouse_HostAddress}}/todos/1
+Accept: application/json
+
+###

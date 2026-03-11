@@ -1,0 +1,7 @@
+﻿services:
+  stockflow-warehouse:
+    image: stockflow-warehouse
+    build:
+      context: .
+      dockerfile: StockFlow-Warehouse/Dockerfile
+
