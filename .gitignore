@@ -406,6 +406,9 @@ FodyWeavers.xsd
 *.sln.iml
 .idea/
 
+# Zed
+.zed/
+
 ##
 ## Visual studio for Mac
 ##
