@@ -6,7 +6,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>StockFlow_Warehouse</RootNamespace>
         <InvariantGlobalization>true</InvariantGlobalization>
-        <PublishAot>true</PublishAot>
+        <PublishAot>false</PublishAot>
+        <PublishTrimmed>false</PublishTrimmed>
+        <UseInterpreter>True</UseInterpreter>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
