@@ -8,7 +8,7 @@ public enum TransactionType
     MOVE
 }
 
-public record struct Transaction(TransactionType Type, Recipient From, Recipient To, Dictionary<Product, int>? Products = null)
+public record struct Transaction(TransactionType Type, Recipient From, Recipient To, List<ProductAmount>? Products = null)
 {
     public Guid Id { get; init; }
         = Guid.NewGuid();
@@ -18,7 +18,7 @@ public record struct Transaction(TransactionType Type, Recipient From, Recipient
         = From;
     public Recipient To { get; set; }
         = To;
-    public Dictionary<Product, int>Products { get; set; }
+    public List<ProductAmount>Products { get; set; }
         = Products ?? [];
 };
 

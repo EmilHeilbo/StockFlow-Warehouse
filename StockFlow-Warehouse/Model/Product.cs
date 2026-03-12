@@ -17,3 +17,11 @@ public record struct Product(string Name, List<Category>? Categories = null)
     public List<Category> Categories { get; set; }
         = Categories ?? [];
 };
+
+public record struct ProductAmount(Product Product, int Amount)
+{
+    public Product Product { get; set; }
+        =  Product;
+    public int Amount { get; set; }
+        =  Amount;
+}
