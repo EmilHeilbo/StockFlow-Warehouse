@@ -1,11 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11605.296 insiders
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockFlow-Warehouse", "StockFlow-Warehouse\StockFlow-Warehouse.csproj", "{281F5E22-8FA9-4508-9EFF-08578EFADA6B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2BCF905C-E595-4D43-8F30-F88BBED84BB6}"
 	ProjectSection(SolutionItems) = preProject
 		compose.yaml = compose.yaml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWarehouse", "TestController\TestWarehouse.csproj", "{ED068885-9A76-48EB-BB73-235D30548AC9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,5 +22,15 @@ Global
 		{281F5E22-8FA9-4508-9EFF-08578EFADA6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{281F5E22-8FA9-4508-9EFF-08578EFADA6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{281F5E22-8FA9-4508-9EFF-08578EFADA6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED068885-9A76-48EB-BB73-235D30548AC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED068885-9A76-48EB-BB73-235D30548AC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED068885-9A76-48EB-BB73-235D30548AC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED068885-9A76-48EB-BB73-235D30548AC9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {08F8A6A2-CA55-4A33-ADCE-CF8EB21E4FE5}
 	EndGlobalSection
 EndGlobal
