@@ -16,13 +16,14 @@ builder.Services.AddOpenApi();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("SQLite")));
+        options.UseInMemoryDatabase("StockFlow"));
 }
 else
 {
-    // TODO: Either fetch username/password from env variables or store them in `appsettings.json`
+    // TODO: fetch username/password or token from environment variables instead of storing them in plaintext
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
 var app = builder.Build();
@@ -39,7 +40,7 @@ using (var scope = app.Services.CreateScope())
     context.SeedData();
 }
 
-// TODO: This doesn't fetch objects recursively. I'll leave this for others to figure out ^u^
+// TODO: This doesn't fetch objects recursively; I'll leave this for others to figure out ^u^
 
 var productApi = app.MapGroup("/api/products");
 productApi.MapGet("/", async (AppDbContext db) =>
