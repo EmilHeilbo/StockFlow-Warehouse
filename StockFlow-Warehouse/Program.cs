@@ -13,11 +13,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("SQLite")));
 }
@@ -28,44 +25,54 @@ else
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
-List<Category> categories =
-[
-    new Category { Name = "Foodstuffs" }
-];
+var app = builder.Build();
 
-List<Product> sampleProducts =
-[
-    new Product { Name = "Baked Beans", Categories = categories },
-    new Product { Name = "Choccy Cola", Categories = categories }
-];
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
 
-var testList = sampleProducts
-    .Select(product => new ProductAmount { Product = product, Amount = 1 })
-    .ToList();
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.EnsureCreated();
+    context.SeedData();
+}
 
-List<Warehouse> warehouses =
-[
-    new Warehouse { Name = "Warehouse A", Address = "Kannikegade 18.1, DK-8200 Aarhus C" },
-    new Warehouse { Name = "Warehouse B", Address = "Silkeborgvej 1, DK-8600 Silkeborg" }
-];
+// TODO: This doesn't fetch objects recursively. I'll leave this for others to figure out ^u^
 
-var testTransaction = new Transaction { Type = TransactionType.Move, From = warehouses[0], To = warehouses[1] };
-testTransaction.Products.AddRange(testList);
-
-var productsApi = app.MapGroup("/api/products");
-productsApi.MapGet("/", () => sampleProducts)
+var productApi = app.MapGroup("/api/products");
+productApi.MapGet("/", async (AppDbContext db) =>
+        await db.Products.ToListAsync())
     .WithName("GetProducts");
 
-productsApi.MapGet("/{id}", Results<Ok<Product>, NotFound> (string id) =>
-        sampleProducts.FirstOrDefault(a
+productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, AppDbContext db) =>
+        await db.Products.FirstOrDefaultAsync(a
             => a.Id.ToString() == id) is { } product
             ? TypedResults.Ok(product)
             : TypedResults.NotFound())
     .WithName("GetProductById");
 
+var warehousesApi = app.MapGroup("/api/warehouses");
+warehousesApi.MapGet("/", async (AppDbContext db) =>
+        await db.Warehouses.ToListAsync())
+    .WithName("GetWarehouses");
+
+warehousesApi.MapGet("/{id}", async Task<Results<Ok<Warehouse>, NotFound>> (string id, AppDbContext db) =>
+        await db.Warehouses.FirstOrDefaultAsync(a
+            => a.Id.ToString() == id) is { } warehouse
+            ? TypedResults.Ok(warehouse)
+            : TypedResults.NotFound())
+    .WithName("GetWarehouseById");
+
 app.Run();
 
 [JsonSerializable(typeof(Product[]))]
-partial class AppJsonSerializerContext : JsonSerializerContext
+[JsonSerializable(typeof(List<Product>))]
+[JsonSerializable(typeof(Category))]
+[JsonSerializable(typeof(Warehouse))]
+[JsonSerializable(typeof(Transaction))]
+[JsonSerializable(typeof(ProductAmount))]
+internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }
