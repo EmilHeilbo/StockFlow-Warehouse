@@ -1,27 +1,22 @@
 ﻿namespace StockFlow_Warehouse.Model;
 
-public record struct Category(string Name)
+public class Category
 {
-    public Guid Id { get; }
-        = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.NewGuid();
     public required string Name { get; set; }
-        = Name;
-};
+}
 
-public record struct Product(string Name, List<Category>? Categories = null)
+public class Product
 {
-    public Guid Id { get; }
-        = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.NewGuid();
     public required string Name { get; set; }
-        = Name;
-    public List<Category> Categories { get; set; }
-        = Categories ?? [];
-};
+    public List<Category> Categories { get; set; } = [];
+}
 
-public record struct ProductAmount(Product Product, int Amount)
+public class ProductAmount
 {
-    public Product Product { get; set; }
-        =  Product;
+    // Lazy workaround to EF Core requiring all model types to have a primary key by default
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public required Product Product { get; set; }
     public int Amount { get; set; }
-        =  Amount;
 }

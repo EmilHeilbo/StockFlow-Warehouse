@@ -2,23 +2,17 @@
 
 public enum TransactionType
 {
-    SALE,
-    PURCHASE,
-    RETURN,
-    MOVE
+    Sale,
+    Purchase,
+    Return,
+    Move
 }
 
-public record struct Transaction(TransactionType Type, Recipient From, Recipient To, List<ProductAmount>? Products = null)
+public class Transaction
 {
-    public Guid Id { get; init; }
-        = Guid.NewGuid();
-    public TransactionType Type { get; set; }
-        = Type;
-    public Recipient From { get; set; }
-        = From;
-    public Recipient To { get; set; }
-        = To;
-    public List<ProductAmount>Products { get; set; }
-        = Products ?? [];
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public required TransactionType Type { get; init; }
+    public required Recipient From { get; init; }
+    public required Recipient To { get; init; }
+    public List<ProductAmount> Products { get; init; } = [];
 };
-
