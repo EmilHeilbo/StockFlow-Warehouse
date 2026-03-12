@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using StockFlow_Warehouse.Model;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -17,30 +18,54 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("SQLite")));
+}
+else
+{
+    // TODO: Either fetch username/password from env variables or store them in `appsettings.json`
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
-Todo[] sampleTodos =
+List<Category> categories =
 [
-    new(1, "Walk the dog"),
-    new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-    new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
-    new(4, "Clean the bathroom"),
-    new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
+    new Category { Name = "Foodstuffs" }
 ];
 
-var todosApi = app.MapGroup("/todos");
-todosApi.MapGet("/", () => sampleTodos)
-    .WithName("GetTodos");
+List<Product> sampleProducts =
+[
+    new Product { Name = "Baked Beans", Categories = categories },
+    new Product { Name = "Choccy Cola", Categories = categories }
+];
 
-todosApi.MapGet("/{id}", Results<Ok<Todo>, NotFound> (int id) =>
-        sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-            ? TypedResults.Ok(todo)
+var testList = sampleProducts
+    .Select(product => new ProductAmount { Product = product, Amount = 1 })
+    .ToList();
+
+List<Warehouse> warehouses =
+[
+    new Warehouse { Name = "Warehouse A", Address = "Kannikegade 18.1, DK-8200 Aarhus C" },
+    new Warehouse { Name = "Warehouse B", Address = "Silkeborgvej 1, DK-8600 Silkeborg" }
+];
+
+var testTransaction = new Transaction { Type = TransactionType.Move, From = warehouses[0], To = warehouses[1] };
+testTransaction.Products.AddRange(testList);
+
+var productsApi = app.MapGroup("/api/products");
+productsApi.MapGet("/", () => sampleProducts)
+    .WithName("GetProducts");
+
+productsApi.MapGet("/{id}", Results<Ok<Product>, NotFound> (string id) =>
+        sampleProducts.FirstOrDefault(a
+            => a.Id.ToString() == id) is { } product
+            ? TypedResults.Ok(product)
             : TypedResults.NotFound())
-    .WithName("GetTodoById");
+    .WithName("GetProductById");
 
 app.Run();
 
-record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-[JsonSerializable(typeof(Todo[]))]
-partial class AppJsonSerializerContext : JsonSerializerContext { }
+[JsonSerializable(typeof(Product[]))]
+partial class AppJsonSerializerContext : JsonSerializerContext
+{
+}
