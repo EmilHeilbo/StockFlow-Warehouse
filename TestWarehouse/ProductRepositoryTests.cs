@@ -44,6 +44,7 @@ public class ProductRepositoryTests
         var result = await _repo.GetAll();
 
         Assert.That(result, Has.Count.EqualTo(2));
+        // TODO test names
     }
 
     [Test]
@@ -71,6 +72,8 @@ public class ProductRepositoryTests
         var result = await _repo.GetById(product.Id);
 
         Assert.That(result, Is.Not.Null);
+        // It is allowed to assume result is not null because it was tested abouve
+        // Therefrore we can safely use result!.Name
         Assert.That(result!.Name, Is.EqualTo("Beans"));
     }
 
@@ -92,6 +95,7 @@ public class ProductRepositoryTests
         var result = await _repo.GetById(product.Id);
 
         Assert.That(result!.Categories, Has.Count.EqualTo(1));
+        // TODO: Name check
     }
 
     // GetAllInCategory
@@ -137,6 +141,7 @@ public class ProductRepositoryTests
         var result = await _repo.GetAllInCategory(organic);
 
         Assert.That(result, Has.Count.EqualTo(1));
+        // TODO: Name check
     }
 
     // Create
@@ -193,7 +198,9 @@ public class ProductRepositoryTests
 
         await _repo.Delete(target.Id);
 
+        // Assert that there is still a product in the database
         Assert.That(await _db.Products.CountAsync(), Is.EqualTo(1));
+        // Assert that the product is other by finding product with id of other
         Assert.That(await _db.Products.FindAsync(other.Id), Is.Not.Null);
     }
 

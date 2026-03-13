@@ -27,6 +27,8 @@ public class ProductRepository : IProductRepository
     public Task<List<Product>> GetAllInCategory(Category category) =>
         WithIncludes().Where(p => p.Categories.Contains(category)).ToListAsync();
 
+    // TODO: Get inclusive/exclusive multiple category lists.
+
     public async Task Create(Product product)
     {
         await _db.AddAsync(product).AsTask();
