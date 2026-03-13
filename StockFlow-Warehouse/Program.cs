@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using StockFlow_Warehouse.Model;
+using StockFlow_Warehouse.Repositories;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -43,8 +44,8 @@ using (var scope = app.Services.CreateScope())
 // TODO: This doesn't fetch objects recursively; I'll leave this for others to figure out ^u^
 
 var productApi = app.MapGroup("/api/products");
-productApi.MapGet("/", async (AppDbContext db) =>
-        await db.Products.ToListAsync())
+productApi.MapGet("/", async (IProductRepository repo) =>
+        await repo.GetAll())
     .WithName("GetProducts");
 
 productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, AppDbContext db) =>
