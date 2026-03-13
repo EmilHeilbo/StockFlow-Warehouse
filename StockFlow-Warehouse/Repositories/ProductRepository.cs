@@ -13,5 +13,39 @@ public class ProductRepository : IProductRepository
         _db = db;
     }
 
-    public Task<List<Product>> GetAll() => _db.Products.ToListAsync();
+    private IQueryable<Product> WithIncludes() =>
+        _db.Products
+            .Include(p => p.Categories);
+
+    public Task<List<Product>> GetAll() => 
+        WithIncludes().ToListAsync();
+
+    public Task<Product?> GetById(Guid id) =>
+        WithIncludes().FirstOrDefaultAsync(a
+            => a.Id == id);
+
+    public Task<List<Product>> GetAllInCategory(Category category) =>
+        WithIncludes().Where(p => p.Categories.Contains(category)).ToListAsync();
+
+    public Task Create(Product product) =>
+        _db.AddAsync(product).AsTask();
+    public async Task Delete(Guid id)
+    {
+        var product = await GetById(id);
+        if(product != null)
+        {
+            _db.Remove(product);
+            await _db.SaveChangesAsync();
+        }
+    }
+
+    public async Task Update(Product product)
+    {
+        Guid id = product.Id;
+        var dbProduct = await GetById(id);
+        if (dbProduct != null)
+        {
+            _db.Entry(dbProduct).CurrentValues.SetValues(product);
+        }
+    }
 }
