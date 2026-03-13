@@ -27,8 +27,12 @@ public class ProductRepository : IProductRepository
     public Task<List<Product>> GetAllInCategory(Category category) =>
         WithIncludes().Where(p => p.Categories.Contains(category)).ToListAsync();
 
-    public Task Create(Product product) =>
-        _db.AddAsync(product).AsTask();
+    public async Task Create(Product product)
+    {
+        await _db.AddAsync(product).AsTask();
+        await _db.SaveChangesAsync();
+    }
+
     public async Task Delete(Guid id)
     {
         var product = await GetById(id);
@@ -46,6 +50,7 @@ public class ProductRepository : IProductRepository
         if (dbProduct != null)
         {
             _db.Entry(dbProduct).CurrentValues.SetValues(product);
+            await _db.SaveChangesAsync();
         }
     }
 }
