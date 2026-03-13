@@ -1,22 +1,21 @@
 ﻿namespace StockFlow_Warehouse.Model;
 
-public record Recipient(string Name, string Address)
+public class Recipient
 {
-    public Guid Id { get; } = Guid.NewGuid();
-    public string Name { get; set; } = Name;
-    public string Address { get; set; } = Address;
-};
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public required string Name { get; set; } = null!;
+    public required string Address { get; set; } = null!;
+}
 
-
-public record Warehouse(string Name, string Address, Dictionary<Product, int>? Products = null)
-    : Recipient(Name: Name, Address: Address)
+public class Warehouse : Recipient
 {
-    Dictionary<Product, int> Products { get; set; }
-        = Products ?? [];
-};
-public record Supplier(string Name, string Address)
-    : Recipient(Name: Name, Address: Address);
-public record Customer(string Name, string Address)
-    : Recipient(Name: Name, Address: Address);
+    public List<ProductAmount> Products { get; set; } = [];
+}
 
+public class Supplier : Recipient
+{
+}
 
+public class Customer : Recipient
+{
+}
