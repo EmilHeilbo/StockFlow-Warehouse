@@ -48,12 +48,17 @@ productApi.MapGet("/", async (IProductRepository repo) =>
         await repo.GetAll())
     .WithName("GetProducts");
 
-productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, AppDbContext db) =>
-        await db.Products.FirstOrDefaultAsync(a
-            => a.Id.ToString() == id) is { } product
+productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, IProductRepository repo) =>
+        await repo.GetById(id) is { } product
             ? TypedResults.Ok(product)
             : TypedResults.NotFound())
     .WithName("GetProductById");
+
+
+
+
+
+
 
 var warehousesApi = app.MapGroup("/api/warehouses");
 warehousesApi.MapGet("/", async (AppDbContext db) =>
