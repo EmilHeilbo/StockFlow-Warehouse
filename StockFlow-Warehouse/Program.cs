@@ -1,9 +1,10 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using StockFlow_Warehouse.Model;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -13,30 +14,25 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseInMemoryDatabase("StockFlow"));
-}
-else
-{
-    // TODO: fetch username/password or token from environment variables instead of storing them in plaintext
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(
-            builder.Configuration.GetConnectionString("DefaultConnection")));
-}
+// TODO: fetch username/password or token from environment variables instead of storing them in plaintext
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("SQLite")));
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    Console.WriteLine("Running in development mode");
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
+    if (app.Environment.IsDevelopment())
+        context.Database.EnsureDeleted();
+    context.Database.Migrate();
     context.SeedData();
 }
 
@@ -44,7 +40,9 @@ using (var scope = app.Services.CreateScope())
 
 var productApi = app.MapGroup("/api/products");
 productApi.MapGet("/", async (AppDbContext db) =>
-        await db.Products.ToListAsync())
+        await db.Products
+            .Include(p => p.Categories)
+            .ToListAsync())
     .WithName("GetProducts");
 
 productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, AppDbContext db) =>
@@ -56,7 +54,9 @@ productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id
 
 var warehousesApi = app.MapGroup("/api/warehouses");
 warehousesApi.MapGet("/", async (AppDbContext db) =>
-        await db.Warehouses.ToListAsync())
+        await db.Warehouses
+            .Include(w => w.Inventory.Select(p => p.Product))
+            .ToListAsync())
     .WithName("GetWarehouses");
 
 warehousesApi.MapGet("/{id}", async Task<Results<Ok<Warehouse>, NotFound>> (string id, AppDbContext db) =>
@@ -73,7 +73,7 @@ app.Run();
 [JsonSerializable(typeof(Category))]
 [JsonSerializable(typeof(Warehouse))]
 [JsonSerializable(typeof(Transaction))]
-[JsonSerializable(typeof(ProductAmount))]
+[JsonSerializable(typeof(InventoryItem))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }
