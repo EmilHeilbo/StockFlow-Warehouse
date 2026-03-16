@@ -13,3 +13,21 @@ Add/Remove Category from Product
 Start/Cancel/Delete order
 Update order state
 
+Consider allowing deleting everything by category like with SQL statements. It is Esben's opinion that we shouldn't do this.
+
+GET
+(
+Get Warehouses
+Get Customers
+Get Suppliers
+)
+  by available products
+
+Get Products
+  by category
+Get Categories
+
+Get Transactions in progress
+  by state or type
+
+All with sorting method
