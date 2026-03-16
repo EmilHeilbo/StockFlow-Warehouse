@@ -18,16 +18,26 @@ Consider allowing deleting everything by category like with SQL statements. It i
 GET
 (
 Get Warehouses
+/api/warehouses
 Get Customers
+/api/customers
 Get Suppliers
+/api/suppliers
 )
   by available products
+  ?productId=<>
 
 Get Products
+/api/products
   by category
+  ?categoryId=<>
 Get Categories
+/api/categories
 
 Get Transactions in progress
+/api/transactions
   by state or type
+  ?state=<>&type=<>
 
 All with sorting method
+?sortBy=<>
