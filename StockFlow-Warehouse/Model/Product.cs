@@ -1,14 +1,18 @@
-﻿namespace StockFlow_Warehouse.Model;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace StockFlow_Warehouse.Model;
 
 public class Category
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    [MaxLength(100)]
     public required string Name { get; set; }
 }
 
 public class Product
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    [MaxLength(100)]
     public required string Name { get; set; }
     public List<Category> Categories { get; set; } = [];
 }
