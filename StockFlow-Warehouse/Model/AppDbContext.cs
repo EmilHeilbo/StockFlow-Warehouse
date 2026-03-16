@@ -11,14 +11,30 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<InventoryItem> LineItems { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Product>()
+            .HasMany(p => p.Categories)
+            .WithMany(c => c.Products);
+        
+        modelBuilder.Entity<Warehouse>()
+            .HasMany(w => w.Inventory)
+            .WithOne(p => p.Warehouse);
+        
+        modelBuilder.Entity<Transaction>()
+            .HasMany(t => t.LineItems)
+            .WithOne(li => li.Transaction);
+    }
 
     public void SeedData()
     {
-        if (Products.Any() || Categories.Any() || Warehouses.Any())
+        if (Products.Any() || Categories.Any() || Warehouses.Any() || Transactions.Any())
         {
             return;
         }
-
+        
         var categories = new List<Category>
         {
             new() { Name = "Foodstuffs" }
@@ -41,7 +57,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         Warehouses.AddRange(warehouses);
 
         var testList = products
-            .Select(product => new ProductAmount { Product = product, Amount = 1 })
+            .Select(product => new TransactionLine { Product = product, Amount = 1, Transaction = null })
             .ToList();
 
         var testTransaction = new Transaction
@@ -49,9 +65,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             Type = TransactionType.Move,
             From = warehouses[0],
             To = warehouses[1],
-            Products = [new ProductAmount { Product = products[0], Amount = 1 }]
+            LineItems = [new TransactionLine { Product = products[0], Amount = 1, Transaction = null }]
         };
-        testTransaction.Products.AddRange(testList);
+        testTransaction.LineItems.AddRange(testList);
         Transactions.Add(testTransaction);
 
         SaveChanges();

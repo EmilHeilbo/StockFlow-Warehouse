@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockFlow_Warehouse.Model;
 
@@ -10,9 +11,11 @@ using StockFlow_Warehouse.Model;
 namespace StockFlow_Warehouse.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260316134856_LineItemsAndRelationships")]
+    partial class LineItemsAndRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -48,7 +51,7 @@ namespace StockFlow_Warehouse.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("StockFlow_Warehouse.Model.InventoryItem", b =>
+            modelBuilder.Entity("StockFlow_Warehouse.Model.LineItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -60,12 +63,17 @@ namespace StockFlow_Warehouse.Migrations
                     b.Property<Guid>("ProductId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("WarehouseId")
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("WarehouseId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("TransactionId");
 
                     b.HasIndex("WarehouseId");
 
@@ -172,33 +180,6 @@ namespace StockFlow_Warehouse.Migrations
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("StockFlow_Warehouse.Model.TransactionLine", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("TransactionId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("TransactionId");
-
-                    b.ToTable("TransactionLine");
-                });
-
             modelBuilder.Entity("StockFlow_Warehouse.Model.Customer", b =>
                 {
                     b.HasBaseType("StockFlow_Warehouse.Model.Recipient");
@@ -235,7 +216,7 @@ namespace StockFlow_Warehouse.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StockFlow_Warehouse.Model.InventoryItem", b =>
+            modelBuilder.Entity("StockFlow_Warehouse.Model.LineItem", b =>
                 {
                     b.HasOne("StockFlow_Warehouse.Model.Product", "Product")
                         .WithMany()
@@ -243,13 +224,17 @@ namespace StockFlow_Warehouse.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("StockFlow_Warehouse.Model.Transaction", "Transaction")
+                        .WithMany("LineItems")
+                        .HasForeignKey("TransactionId");
+
                     b.HasOne("StockFlow_Warehouse.Model.Warehouse", "Warehouse")
                         .WithMany("Inventory")
-                        .HasForeignKey("WarehouseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("WarehouseId");
 
                     b.Navigation("Product");
+
+                    b.Navigation("Transaction");
 
                     b.Navigation("Warehouse");
                 });
@@ -267,25 +252,6 @@ namespace StockFlow_Warehouse.Migrations
                     b.Navigation("From");
 
                     b.Navigation("To");
-                });
-
-            modelBuilder.Entity("StockFlow_Warehouse.Model.TransactionLine", b =>
-                {
-                    b.HasOne("StockFlow_Warehouse.Model.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("StockFlow_Warehouse.Model.Transaction", "Transaction")
-                        .WithMany("LineItems")
-                        .HasForeignKey("TransactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Transaction", b =>
