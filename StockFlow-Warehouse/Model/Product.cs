@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace StockFlow_Warehouse.Model;
 
@@ -14,7 +15,7 @@ public class Product
     public Guid Id { get; init; } = Guid.NewGuid();
     [MaxLength(100)]
     public required string Name { get; set; }
-
+    [Precision(10, 2)]
     public decimal Price { get; set; } = 0;
     [MaxLength(14)]
     [RegularExpression("^[0-9]{0,14}$")]
