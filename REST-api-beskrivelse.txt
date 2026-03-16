@@ -1,0 +1,15 @@
+POST, DELETE
+Add/Remove/Modify Warehouse
+Add/Remove/Modify Customer
+Add/Remove/Modify Supplier
+
+Add/Remove/Modify Product
+Add/Remove/Modify Category
+
+Add/Remove Product amount from Warehouse
+?Add/Remove available amount from Supplier
+Add/Remove Category from Product
+
+Start/Cancel/Delete order
+Update order state
+
