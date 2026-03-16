@@ -30,4 +30,5 @@ public class Transaction
     public List<ProductAmount> Products { get; init; } = [];
     [MaxLength(50)]
     public string TrackingId { get; set; } = "";
+    public decimal TotalPrice => Products.Sum(p => p.TotalPrice);
 };

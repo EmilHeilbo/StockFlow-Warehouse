@@ -30,4 +30,5 @@ public class ProductAmount
     public Guid Id { get; init; } = Guid.NewGuid();
     public required Product Product { get; set; }
     public int Amount { get; set; }
+    public decimal TotalPrice => Product.Price * Amount;
 }
