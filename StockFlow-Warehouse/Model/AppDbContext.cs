@@ -21,19 +21,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         var categories = new List<Category>
         {
-            new Category { Name = "Foodstuffs" }
+            new() { Name = "Foodstuffs" }
         };
 
         var products = new List<Product>
         {
-            new Product { Name = "Baked Beans", Categories = categories },
-            new Product { Name = "Choccy Cola", Categories = categories }
+            new() { Name = "Baked Beans", Categories = categories },
+            new() { Name = "Choccy Cola", Categories = categories }
         };
 
         var warehouses = new List<Warehouse>
         {
-            new Warehouse { Name = "Warehouse A", Address = "Kannikegade 18.1, DK-8200 Aarhus C" },
-            new Warehouse { Name = "Warehouse B", Address = "Silkeborgvej 1, DK-8600 Silkeborg" }
+            new() { Name = "Warehouse A", Address = "Kannikegade 18.1, DK-8200 Aarhus C" },
+            new() { Name = "Warehouse B", Address = "Silkeborgvej 1, DK-8600 Silkeborg" }
         };
 
         Categories.AddRange(categories);
