@@ -13,6 +13,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -39,8 +40,6 @@ using (var scope = app.Services.CreateScope())
     context.Database.Migrate();
     context.SeedData();
 }
-
-// TODO: This doesn't fetch objects recursively; I'll leave this for others to figure out ^u^
 
 var productApi = app.MapGroup("/api/products");
 productApi.MapGet("/", async (AppDbContext db) =>
