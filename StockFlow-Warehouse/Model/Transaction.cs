@@ -59,6 +59,6 @@ public class Transaction
     public Recipient? To { get; set; }
     public List<TransactionLine> LineItems { get; set; } = [];
     [MaxLength(50)]
-    public string TrackingId { get; set; } = "";
+    public string TrackingNumber { get; set; } = "";
     public decimal TotalPrice => LineItems.Sum(p => p.TotalPrice);
 };
