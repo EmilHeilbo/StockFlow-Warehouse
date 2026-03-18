@@ -44,6 +44,30 @@ using (var scope = app.Services.CreateScope())
 // TODO: This doesn't fetch objects recursively; I'll leave this for others to figure out ^u^
 
 var productApi = app.MapGroup("/api/products");
+
+productApi.MapGroup("/api");
+productApi.MapGet("/warehouses", async Task<Results<Ok<List<Warehouse>>, NotFound>> (IWarehouseRepository repo) =>
+        await repo.GetAll() is { } warehouseList
+        ? TypedResults.Ok(warehouseList)
+        : TypedResults.NotFound())
+    .WithName("GetWarehouses");
+
+productApi.MapGet("/customers", async Task<Results<Ok<List<Customer>>, NotFound>> (ICustomerRepository repo) =>
+        await repo.GetAll() is { } customerList
+        ? TypedResults.Ok(customerList)
+        : TypedResults.NotFound())
+    .WithName("GetCustomers");
+
+productApi.MapGet("/suppliers", async Task<Results<Ok<List<Customer>>, NotFound>> (ISupplierRepository repo) =>
+        await repo.GetAll() is { } supplierList
+        ? TypedResults.Ok(supplierList)
+        : TypedResults.NotFound())
+    .WithName("GetSuppliers");
+
+
+
+productApi.MapGet("/", async (AppDbContext db) =>
+        await db.Products.ToListAsync());
 productApi.MapGet("/", async (IProductRepository repo) =>
         await repo.GetAll())
     .WithName("GetProducts");
