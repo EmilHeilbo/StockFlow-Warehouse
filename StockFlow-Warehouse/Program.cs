@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using StockFlow_Warehouse.Model;
@@ -22,8 +23,18 @@ builder.Services.AddOpenApi();
 // TODO: fetch username/password or token from environment variables instead of storing them in plaintext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("SQLite")));
+builder.Services.AddDbContext<UserDbContext>( 
+    options => options.UseSqlite(builder.Configuration.GetConnectionString("SQLite")));
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication();
+builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+    .AddEntityFrameworkStores<UserDbContext>()
+    .AddDefaultTokenProviders();
 
 var app = builder.Build();
+
+app.MapIdentityApi<IdentityUser>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -35,8 +46,10 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var idContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
     if (app.Environment.IsDevelopment())
         context.Database.EnsureDeleted();
+    idContext.Database.Migrate();
     context.Database.Migrate();
     context.SeedData();
 }
@@ -80,7 +93,16 @@ transactionsApi.MapGet("/", async (AppDbContext db) =>
             .Include(t => t.LineItems)
             .ThenInclude(l => l.Product)
             .ToListAsync())
-    .WithName("GetTransactions");
+    .WithName("GetTransactions")
+    .RequireAuthorization();
+
+transactionsApi.MapGet("/orders", async (AppDbContext db) =>
+        await db.Transactions
+            .Where(t => t.Type == TransactionType.Sale || t.Type == TransactionType.Return)
+            .Include(t => t.LineItems)
+            .ThenInclude(l => l.Product)
+            .ToListAsync())
+    .WithName("GetOrders");
 
 app.Run();
 
