@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using StockFlow_Warehouse.Model;
+using StockFlow_Warehouse.Repositories;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateSlimBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -57,17 +58,18 @@ using (var scope = app.Services.CreateScope())
 }
 
 var productApi = app.MapGroup("/api/products");
-productApi.MapGet("/", async (AppDbContext db) =>
-        await db.Products
-            .Include(p => p.Categories)
-            .ToListAsync())
+productApi.MapGet("/", async (IProductRepository repo) =>
+        await repo.GetAll())
     .WithName("GetProducts");
 
-productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, AppDbContext db) =>
-        await db.Products.FirstOrDefaultAsync(a
-            => a.Id.ToString() == id) is { } product
+
+productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, IProductRepository repo) =>
+        {
+            Guid guid = Guid.Parse(id);
+            return await repo.GetById(guid) is { } product
             ? TypedResults.Ok(product)
-            : TypedResults.NotFound())
+            : TypedResults.NotFound();
+        })
     .WithName("GetProductById");
 
 var warehousesApi = app.MapGroup("/api/warehouses");
