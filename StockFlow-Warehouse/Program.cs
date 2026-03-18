@@ -10,6 +10,10 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -54,13 +58,18 @@ productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id
 
 var warehousesApi = app.MapGroup("/api/warehouses");
 warehousesApi.MapGet("/", async (AppDbContext db) =>
-        await db.Warehouses
-            .Include(w => w.Inventory.Select(p => p.Product))
+        await db.Recipients
+            .Where(r => r.Type == RecipientType.Warehouse)
+            .Include(w => w.Inventory)
+            .ThenInclude(i => i.Product)
+            .ThenInclude(p => p.Categories)
             .ToListAsync())
     .WithName("GetWarehouses");
 
-warehousesApi.MapGet("/{id}", async Task<Results<Ok<Warehouse>, NotFound>> (string id, AppDbContext db) =>
-        await db.Warehouses.FirstOrDefaultAsync(a
+warehousesApi.MapGet("/{id}", async Task<Results<Ok<Recipient>, NotFound>> (string id, AppDbContext db) =>
+        await db.Recipients
+            .Where(r => r.Type == RecipientType.Warehouse)
+            .FirstOrDefaultAsync(a
             => a.Id.ToString() == id) is { } warehouse
             ? TypedResults.Ok(warehouse)
             : TypedResults.NotFound())
@@ -68,12 +77,12 @@ warehousesApi.MapGet("/{id}", async Task<Results<Ok<Warehouse>, NotFound>> (stri
 
 app.Run();
 
-[JsonSerializable(typeof(Product[]))]
-[JsonSerializable(typeof(List<Product>))]
+[JsonSerializable(typeof(Product))]
 [JsonSerializable(typeof(Category))]
-[JsonSerializable(typeof(Warehouse))]
+[JsonSerializable(typeof(Recipient))]
 [JsonSerializable(typeof(Transaction))]
 [JsonSerializable(typeof(InventoryItem))]
+[JsonSerializable(typeof(TransactionLine))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }

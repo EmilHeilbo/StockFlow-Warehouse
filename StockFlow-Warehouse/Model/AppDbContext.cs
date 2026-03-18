@@ -7,34 +7,57 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
-    public DbSet<Warehouse> Warehouses { get; set; }
-    public DbSet<Customer> Customers { get; set; }
-    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<Recipient> Recipients { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
-    public DbSet<InventoryItem> LineItems { get; set; }
+    public DbSet<InventoryItem> InventoryItems { get; set; }
+    public DbSet<TransactionLine> TransactionLines { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.From)
+            .WithMany()
+            .HasForeignKey(t => t.FromId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.To)
+            .WithMany()
+            .HasForeignKey(t => t.ToId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Transaction>()
+            .HasMany(t => t.LineItems)
+            .WithOne(li => li.Transaction)
+            .HasForeignKey(li => li.TransactionId);
+
+        modelBuilder.Entity<TransactionLine>()
+            .HasOne(t => t.Product)
+            .WithMany()
+            .HasForeignKey(t => t.ProductId);
+
         modelBuilder.Entity<Product>()
             .HasMany(p => p.Categories)
             .WithMany(c => c.Products);
-        
-        modelBuilder.Entity<Warehouse>()
+
+        modelBuilder.Entity<Recipient>()
             .HasMany(w => w.Inventory)
-            .WithOne(p => p.Warehouse);
-        
-        modelBuilder.Entity<Transaction>()
-            .HasMany(t => t.LineItems)
-            .WithOne(li => li.Transaction);
+            .WithOne(w => w.Warehouse)
+            .HasForeignKey(i => i.WarehouseId);
+
+        modelBuilder.Entity<InventoryItem>()
+            .HasOne(i => i.Product)
+            .WithMany()
+            .HasForeignKey(i => i.ProductId);
     }
 
     public void SeedData()
     {
-        if (Products.Any() || Categories.Any() || Warehouses.Any() || Transactions.Any())
+        if (Products.Any() || Categories.Any() || Recipients.Any() || Transactions.Any())
         {
             return;
         }
-        
+
         var categories = new List<Category>
         {
             new() { Name = "Foodstuffs" }
@@ -46,28 +69,43 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new() { Name = "Choccy Cola", Categories = categories }
         };
 
-        var warehouses = new List<Warehouse>
+        var warehouses = new List<Recipient>
         {
-            new() { Name = "Warehouse A", Address = "Kannikegade 18.1, DK-8200 Aarhus C" },
-            new() { Name = "Warehouse B", Address = "Silkeborgvej 1, DK-8600 Silkeborg" }
+            new()
+            {
+                Name = "Warehouse A",
+                Address = "Kannikegade 18.1, DK-8200 Aarhus C", 
+                Type = RecipientType.Warehouse
+            },
+            new()
+            {
+                Name = "Warehouse B", 
+                Address = "Silkeborgvej 1, DK-8600 Silkeborg", 
+                Type = RecipientType.Warehouse
+            }
         };
+
+        warehouses.ForEach(warehouse =>
+            warehouse.Inventory = products
+                .Select(product => new InventoryItem(warehouse, product, 100)).ToList());
 
         Categories.AddRange(categories);
         Products.AddRange(products);
-        Warehouses.AddRange(warehouses);
-
-        var testList = products
-            .Select(product => new TransactionLine { Product = product, Amount = 1, Transaction = null })
-            .ToList();
+        Recipients.AddRange(warehouses);
 
         var testTransaction = new Transaction
         {
             Type = TransactionType.Move,
             From = warehouses[0],
-            To = warehouses[1],
-            LineItems = [new TransactionLine { Product = products[0], Amount = 1, Transaction = null }]
+            To = warehouses[1]
         };
-        testTransaction.LineItems.AddRange(testList);
+
+        testTransaction.LineItems =
+        [
+            new TransactionLine(products[0], testTransaction, 1),
+            new TransactionLine(products[1], testTransaction, 1)
+        ];
+
         Transactions.Add(testTransaction);
 
         SaveChanges();
