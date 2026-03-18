@@ -66,8 +66,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         var products = new List<Product>
         {
-            new() { Name = "Baked Beans", Categories = categories },
-            new() { Name = "Choccy Cola", Categories = categories }
+            new()
+            {
+                Name = "Baked Beans",
+                Categories = categories,
+                Price = 3.50m
+            },
+            new()
+            {
+                Name = "Choccy Cola",
+                Categories = categories,
+                Price = 8.50m
+            }
         };
 
         var warehouses = new List<Recipient>
@@ -75,14 +85,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new()
             {
                 Name = "Warehouse A",
-                Address = "Kannikegade 18.1, DK-8200 Aarhus C", 
-                Type = RecipientType.Warehouse
+                Address = "Kannikegade 18.1, DK-8200 Aarhus C",
+                Type = RecipientType.Warehouse,
+                PhoneNumber = "004512345678",
             },
             new()
             {
-                Name = "Warehouse B", 
-                Address = "Silkeborgvej 1, DK-8600 Silkeborg", 
-                Type = RecipientType.Warehouse
+                Name = "Warehouse B",
+                Address = "Silkeborgvej 1, DK-8600 Silkeborg",
+                Type = RecipientType.Warehouse,
+                Email = "emil@heilbo.dev",
             }
         };
 
@@ -96,7 +108,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         var testTransaction = new Transaction
         {
-            Type = TransactionType.Move,
+            Type = TransactionType.Sale,
             From = warehouses[0],
             To = warehouses[1]
         };
