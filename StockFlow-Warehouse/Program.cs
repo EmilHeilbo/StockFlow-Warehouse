@@ -74,6 +74,14 @@ warehousesApi.MapGet("/{id}", async Task<Results<Ok<Recipient>, NotFound>> (stri
             : TypedResults.NotFound())
     .WithName("GetWarehouseById");
 
+var transactionsApi = app.MapGroup("/api/transactions");
+transactionsApi.MapGet("/", async (AppDbContext db) =>
+        await db.Transactions
+            .Include(t => t.LineItems)
+            .ThenInclude(l => l.Product)
+            .ToListAsync())
+    .WithName("GetTransactions");
+
 app.Run();
 
 [JsonSerializable(typeof(Product))]
