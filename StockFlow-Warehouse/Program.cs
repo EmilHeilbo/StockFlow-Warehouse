@@ -29,6 +29,7 @@ builder.Services.AddDbContext<UserDbContext>(
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
 builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<UserDbContext>()
     .AddDefaultTokenProviders();
 
@@ -48,10 +49,11 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var idContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
     if (app.Environment.IsDevelopment())
-        context.Database.EnsureDeleted();
-    idContext.Database.Migrate();
-    context.Database.Migrate();
-    context.SeedData();
+        await context.Database.EnsureDeletedAsync();
+    await idContext.Database.MigrateAsync();
+    await context.Database.MigrateAsync();
+    await context.SeedDataAsync();
+    await idContext.SeedRolesAsync(scope.ServiceProvider);
 }
 
 var productApi = app.MapGroup("/api/products");

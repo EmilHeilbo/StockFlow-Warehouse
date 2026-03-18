@@ -51,8 +51,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(i => i.ProductId);
     }
 
-    public void SeedData()
+    public async Task SeedDataAsync()
     {
+        await Database.EnsureCreatedAsync();
         if (Products.Any() || Categories.Any() || Recipients.Any() || Transactions.Any())
         {
             return;
@@ -89,9 +90,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             warehouse.Inventory = products
                 .Select(product => new InventoryItem(warehouse, product, 100)).ToList());
 
-        Categories.AddRange(categories);
-        Products.AddRange(products);
-        Recipients.AddRange(warehouses);
+        await Categories.AddRangeAsync(categories);
+        await Products.AddRangeAsync(products);
+        await Recipients.AddRangeAsync(warehouses);
 
         var testTransaction = new Transaction
         {
@@ -106,8 +107,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new TransactionLine(products[1], testTransaction, 1)
         ];
 
-        Transactions.Add(testTransaction);
+        await Transactions.AddAsync(testTransaction);
 
-        SaveChanges();
+        await SaveChangesAsync();
     }
 }

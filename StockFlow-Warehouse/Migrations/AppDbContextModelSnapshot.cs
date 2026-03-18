@@ -29,7 +29,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasIndex("ProductsId");
 
-                    b.ToTable("CategoryProduct");
+                    b.ToTable("CategoryProduct", (string)null);
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Category", b =>
@@ -45,7 +45,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.InventoryItem", b =>
@@ -69,7 +69,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("InventoryItems");
+                    b.ToTable("InventoryItems", (string)null);
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Product", b =>
@@ -99,7 +99,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Recipient", b =>
@@ -131,7 +131,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Recipients");
+                    b.ToTable("Recipients", (string)null);
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Transaction", b =>
@@ -163,7 +163,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasIndex("ToId");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.TransactionLine", b =>
@@ -190,7 +190,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasIndex("TransactionId");
 
-                    b.ToTable("TransactionLines");
+                    b.ToTable("TransactionLines", (string)null);
                 });
 
             modelBuilder.Entity("CategoryProduct", b =>
