@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockFlow_Warehouse.Model;
 using StockFlow_Warehouse.Repositories;
@@ -27,6 +28,12 @@ else
             builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
+builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -41,15 +48,76 @@ using (var scope = app.Services.CreateScope())
     context.SeedData();
 }
 
-// TODO: This doesn't fetch objects recursively; I'll leave this for others to figure out ^u^
+var api = app.MapGroup("/api");
 
-var productApi = app.MapGroup("/api/products");
-productApi.MapGet("/", async (IProductRepository repo) =>
+
+api.MapGet("/warehouses", async Task<Results<Ok<List<Warehouse>>, NotFound>> ([FromServices] IWarehouseRepository repo) =>
+        await repo.GetAll() is { } warehouseList
+        ? TypedResults.Ok(warehouseList)
+        : TypedResults.NotFound())
+    .WithName("GetWarehouses");
+
+
+
+   api.MapGet("/customers", async Task<Results<Ok<List<Customer>>, NotFound>> ([FromServices] ICustomerRepository repo) =>
+        await repo.GetAll() is { } customerList
+        ? TypedResults.Ok(customerList)
+        : TypedResults.NotFound())
+    .WithName("GetCustomers");
+
+
+api.MapGet("/suppliers", async Task<Results<Ok<List<Supplier>>, NotFound>> ([FromServices]  ISupplierRepository repo) =>
+        await repo.GetAll() is { } supplierList
+        ? TypedResults.Ok(supplierList)
+        : TypedResults.NotFound())
+    .WithName("GetSuppliers");
+
+
+
+api.MapGet("/products", async Task<Results<Ok<List<Product>>, NotFound>> ([FromServices] IProductRepository repo, AppDbContext db, [FromQuery(Name = "categoryId")] Guid? categoryId) =>
+        {
+            if(categoryId == null)
+            {
+                return await repo.GetAll() is { } productList
+                ? TypedResults.Ok(productList)
+                : TypedResults.NotFound();
+            } else
+            {
+                //Implement
+                List<Category> categories = await db.Categories.ToListAsync();
+                var matchingCategory = categories.Find(c => c.Id == categoryId);
+                var matchId = matchingCategory != null ? matchingCategory.Id : Guid.Empty;
+                return await repo.GetById(matchId) is { } product
+                ? TypedResults.Ok(new List<Product>{product})
+                : TypedResults.NotFound();
+            }
+            
+        })
+    .WithName("GetProducts");
+
+//Not ideal, but we don't have repository for category
+api.MapGet("/categories", async Task<Results<Ok<List<Category>>, NotFound>> (AppDbContext db) =>
+        await db.Categories.ToListAsync() is { } warehouseList
+        ? TypedResults.Ok(warehouseList)
+        : TypedResults.NotFound())
+    .WithName("GetCategories");
+
+api.MapGet("/transactions", async Task<Results<Ok<List<Transaction>>, NotFound>> ([FromServices] ITransactionRepository repo) =>
+        await repo.GetAll() is { } warehouseList
+        ? TypedResults.Ok(warehouseList)
+        : TypedResults.NotFound())
+    .WithName("GetTransactions");
+/*
+
+
+api.MapGet("/", async (AppDbContext db) =>
+        await db.Products.ToListAsync());
+api.MapGet("/", async (IProductRepository repo) =>
         await repo.GetAll())
     .WithName("GetProducts");
 
 
-productApi.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, IProductRepository repo) =>
+api.MapGet("/{id}", async Task<Results<Ok<Product>, NotFound>> (string id, IProductRepository repo) =>
         {
             Guid guid = Guid.Parse(id);
             return await repo.GetById(guid) is { } product
@@ -75,7 +143,7 @@ warehousesApi.MapGet("/{id}", async Task<Results<Ok<Warehouse>, NotFound>> (stri
             ? TypedResults.Ok(warehouse)
             : TypedResults.NotFound())
     .WithName("GetWarehouseById");
-
+*/
 app.Run();
 
 [JsonSerializable(typeof(Product[]))]

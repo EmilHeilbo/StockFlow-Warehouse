@@ -1,0 +1,43 @@
+POST, DELETE
+Add/Remove/Modify Warehouse
+Add/Remove/Modify Customer
+Add/Remove/Modify Supplier
+
+Add/Remove/Modify Product
+Add/Remove/Modify Category
+
+Add/Remove Product amount from Warehouse
+?Add/Remove available amount from Supplier
+Add/Remove Category from Product
+
+Start/Cancel/Delete order
+Update order state
+
+Consider allowing deleting everything by category like with SQL statements. It is Esben's opinion that we shouldn't do this.
+
+GET
+(
+Get Warehouses
+/api/warehouses
+Get Customers
+/api/customers
+Get Suppliers
+/api/suppliers
+)
+  by available products
+  ?productId=<>
+
+Get Products
+/api/products
+  by category
+  ?categoryId=<>
+Get Categories
+/api/categories
+
+Get Transactions in progress
+/api/transactions
+  by state or type
+  ?state=<>&type=<>
+
+All with sorting method
+?sortBy=<>
