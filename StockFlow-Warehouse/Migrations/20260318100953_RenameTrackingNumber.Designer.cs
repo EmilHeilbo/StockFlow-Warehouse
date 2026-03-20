@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StockFlow_Warehouse.Model;
 
@@ -10,9 +11,11 @@ using StockFlow_Warehouse.Model;
 namespace StockFlow_Warehouse.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260318100953_RenameTrackingNumber")]
+    partial class RenameTrackingNumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -29,7 +32,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasIndex("ProductsId");
 
-                    b.ToTable("CategoryProduct", (string)null);
+                    b.ToTable("CategoryProduct");
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Category", b =>
@@ -45,7 +48,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.InventoryItem", b =>
@@ -69,7 +72,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("InventoryItems", (string)null);
+                    b.ToTable("InventoryItems");
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Product", b =>
@@ -99,7 +102,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Recipient", b =>
@@ -131,7 +134,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Recipients", (string)null);
+                    b.ToTable("Recipients");
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.Transaction", b =>
@@ -163,7 +166,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasIndex("ToId");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("StockFlow_Warehouse.Model.TransactionLine", b =>
@@ -190,7 +193,7 @@ namespace StockFlow_Warehouse.Migrations
 
                     b.HasIndex("TransactionId");
 
-                    b.ToTable("TransactionLines", (string)null);
+                    b.ToTable("TransactionLines");
                 });
 
             modelBuilder.Entity("CategoryProduct", b =>
