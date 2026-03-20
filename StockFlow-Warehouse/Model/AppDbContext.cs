@@ -15,7 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<InventoryItem> InventoryItems { get; set; }
     public DbSet<TransactionLine> TransactionLines { get; set; }
 
-    public async Task SeedRolesAsync(IServiceProvider serviceProvider)
+    public static async Task SeedRolesAsync(IServiceProvider serviceProvider)
     {
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 

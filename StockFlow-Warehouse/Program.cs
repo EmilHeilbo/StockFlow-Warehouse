@@ -52,7 +52,7 @@ using (var scope = app.Services.CreateScope())
         await context.Database.EnsureDeletedAsync();
     await context.Database.MigrateAsync();
     await context.SeedDataAsync();
-    await context.SeedRolesAsync(scope.ServiceProvider);
+    await AppDbContext.SeedRolesAsync(scope.ServiceProvider);
 }
 
 var productApi = app.MapGroup("/api/products");
