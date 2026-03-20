@@ -7,53 +7,120 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
-    public DbSet<Warehouse> Warehouses { get; set; }
-    public DbSet<Customer> Customers { get; set; }
-    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<Recipient> Recipients { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<InventoryItem> InventoryItems { get; set; }
+    public DbSet<TransactionLine> TransactionLines { get; set; }
 
-    public void SeedData()
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        if (Products.Any() || Categories.Any() || Warehouses.Any())
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.From)
+            .WithMany()
+            .HasForeignKey(t => t.FromId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.To)
+            .WithMany()
+            .HasForeignKey(t => t.ToId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Transaction>()
+            .HasMany(t => t.LineItems)
+            .WithOne(li => li.Transaction)
+            .HasForeignKey(li => li.TransactionId);
+
+        modelBuilder.Entity<TransactionLine>()
+            .HasOne(t => t.Product)
+            .WithMany()
+            .HasForeignKey(t => t.ProductId);
+
+        modelBuilder.Entity<Product>()
+            .HasMany(p => p.Categories)
+            .WithMany(c => c.Products);
+
+        modelBuilder.Entity<Recipient>()
+            .HasMany(w => w.Inventory)
+            .WithOne(w => w.Warehouse)
+            .HasForeignKey(i => i.WarehouseId);
+
+        modelBuilder.Entity<InventoryItem>()
+            .HasOne(i => i.Product)
+            .WithMany()
+            .HasForeignKey(i => i.ProductId);
+    }
+
+    public async Task SeedDataAsync()
+    {
+        await Database.EnsureCreatedAsync();
+        if (Products.Any() || Categories.Any() || Recipients.Any() || Transactions.Any())
         {
             return;
         }
 
         var categories = new List<Category>
         {
-            new Category { Name = "Foodstuffs" }
+            new() { Name = "Foodstuffs" }
         };
 
         var products = new List<Product>
         {
-            new Product { Name = "Baked Beans", Categories = categories },
-            new Product { Name = "Choccy Cola", Categories = categories }
+            new()
+            {
+                Name = "Baked Beans",
+                Categories = categories,
+                Price = 3.50m
+            },
+            new()
+            {
+                Name = "Choccy Cola",
+                Categories = categories,
+                Price = 8.50m
+            }
         };
 
-        var warehouses = new List<Warehouse>
+        var warehouses = new List<Recipient>
         {
-            new Warehouse { Name = "Warehouse A", Address = "Kannikegade 18.1, DK-8200 Aarhus C" },
-            new Warehouse { Name = "Warehouse B", Address = "Silkeborgvej 1, DK-8600 Silkeborg" }
+            new()
+            {
+                Name = "Warehouse A",
+                Address = "Kannikegade 18.1, DK-8200 Aarhus C",
+                Type = RecipientType.Warehouse,
+                PhoneNumber = "004512345678",
+            },
+            new()
+            {
+                Name = "Warehouse B",
+                Address = "Silkeborgvej 1, DK-8600 Silkeborg",
+                Type = RecipientType.Warehouse,
+                Email = "emil@heilbo.dev",
+            }
         };
 
-        Categories.AddRange(categories);
-        Products.AddRange(products);
-        Warehouses.AddRange(warehouses);
+        warehouses.ForEach(warehouse =>
+            warehouse.Inventory = products
+                .Select(product => new InventoryItem(warehouse, product, 100)).ToList());
 
-        var testList = products
-            .Select(product => new ProductAmount { Product = product, Amount = 1 })
-            .ToList();
+        await Categories.AddRangeAsync(categories);
+        await Products.AddRangeAsync(products);
+        await Recipients.AddRangeAsync(warehouses);
 
         var testTransaction = new Transaction
         {
-            Type = TransactionType.Move,
+            Type = TransactionType.Sale,
             From = warehouses[0],
-            To = warehouses[1],
-            Products = [new ProductAmount { Product = products[0], Amount = 1 }]
+            To = warehouses[1]
         };
-        testTransaction.Products.AddRange(testList);
-        Transactions.Add(testTransaction);
 
-        SaveChanges();
+        testTransaction.LineItems =
+        [
+            new TransactionLine(products[0], testTransaction, 1),
+            new TransactionLine(products[1], testTransaction, 1)
+        ];
+
+        await Transactions.AddAsync(testTransaction);
+
+        await SaveChangesAsync();
     }
 }
