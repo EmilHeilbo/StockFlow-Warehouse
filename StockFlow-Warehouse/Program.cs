@@ -24,8 +24,6 @@ builder.Services.AddOpenApi();
 // TODO: fetch username/password or token from environment variables instead of storing them in plaintext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("SQLite")));
-builder.Services.AddDbContext<UserDbContext>( 
-    options => options.UseSqlite(builder.Configuration.GetConnectionString("SQLite")));
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
@@ -48,13 +46,11 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var idContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
     if (app.Environment.IsDevelopment())
         await context.Database.EnsureDeletedAsync();
-    await idContext.Database.MigrateAsync();
     await context.Database.MigrateAsync();
     await context.SeedDataAsync();
-    await idContext.SeedRolesAsync(scope.ServiceProvider);
+    await context.SeedRolesAsync(scope.ServiceProvider);
 }
 
 var productApi = app.MapGroup("/api/products");
